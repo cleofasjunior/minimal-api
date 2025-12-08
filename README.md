@@ -35,11 +35,13 @@ graph TD;
     
     Tests-->Unitarios(Testes de Unidade);
     Tests-->Integracao(Testes de Integração);
+````
 
 ### 📂 Estrutura de Pastas
 
 A organização do projeto segue a separação por responsabilidade técnica e contexto delimitado:
 
+```plaintext
 📦 MinimalApi.sln
  ┣ 📂 src
  ┃ ┗ 📂 MinimalApi
@@ -56,6 +58,7 @@ A organização do projeto segue a separação por responsabilidade técnica e c
      ┣ 📂 Dominio       # Testes de Entidades isoladas
      ┣ 📂 Infra         # Testes de Persistência (Banco em Memória)
      ┗ 📂 Integration   # Testes de Requisição HTTP (Simulação Real)
+```
 
 ## 🚀 Tecnologias e Decisões Técnicas
 
@@ -106,7 +109,7 @@ dotnet test
 1.  **Clone o repositório:**
 
     ```bash
-    git clone [https://github.com/cleofasjunior/minimal-api.git](https://github.com/cleofasjunior/minimal-api.git)
+    git clone https://github.com/cleofasjunior/minimal-api.git
     ```
 
 2.  **Entre na pasta:**
