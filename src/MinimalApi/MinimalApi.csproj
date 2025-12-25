@@ -1,10 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>MinimalApi</RootNamespace>
+    <UserSecretsId>fc5bc815-8b03-4107-b166-06004c3f912f</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

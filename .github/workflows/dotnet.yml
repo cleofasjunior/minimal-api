@@ -1,0 +1,43 @@
+name: .NET 9 Build & Test (CI)
+
+# GATILHOS: Quando essa automação deve rodar?
+on:
+  push:
+    branches: [ "main", "master" ] # Roda a cada push na branch principal
+  pull_request:
+    branches: [ "main", "master" ] # Roda quando alguém abre um Pull Request
+
+jobs:
+  build:
+    name: Compilar e Testar
+    runs-on: ubuntu-latest # Roda em uma máquina Linux virtual do GitHub
+
+    env:
+      # Define uma chave de teste para o ambiente de CI
+      # Isso garante que os testes de integração (Login/Token) funcionem
+      Jwt__Key: "MinhaChaveSecretaDeTesteParaO_GitHubActions_2025"
+
+    steps:
+    # 1. Baixa o código do seu repositório
+    - name: Checkout do Código
+      uses: actions/checkout@v4
+
+    # 2. Instala o .NET 9
+    - name: Configurar .NET 9
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+
+    # 3. Restaura as dependências (Nuget)
+    - name: Restaurar Dependências
+      run: dotnet restore
+
+    # 4. Compila o projeto (Build)
+    # --no-restore agiliza pois já restauramos no passo anterior
+    - name: Compilar (Build)
+      run: dotnet build --no-restore --configuration Release
+
+    # 5. Roda os Testes (Unitários e Integração)
+    # Aqui a mágica acontece! Se algum teste falhar, o processo para.
+    - name: Executar Testes Automatizados
+      run: dotnet test --no-build --configuration Release --verbosity normal

@@ -10,62 +10,70 @@ namespace MinimalApi.Tests.Integration;
 [TestClass]
 public class VeiculoRequestTest
 {
-    // O "global::Program" garante que estamos pegando a classe Program.cs da raiz
     private static WebApplicationFactory<global::Program> _factory = default!;
 
     [ClassInitialize]
     public static void ClassInit(TestContext testContext)
     {
+        // Cria a fábrica apenas uma vez para todos os testes desta classe (Performance)
         _factory = new WebApplicationFactory<global::Program>();
     }
 
     [TestMethod]
     public async Task TestarCadastroVeiculo_ComTokenAdm_DeveRetornar201()
     {
-        // ARRANGE --------------------------------------------
+        // 1. ARRANGE: Preparar cenário
         var client = _factory.CreateClient();
 
-        // 1. Fazer Login para pegar o Token
+        // Passo A: Fazer Login para pegar o Token de Adm
         var loginDto = new LoginDTO { Email = "adm@teste.com", Senha = "123456" };
         var responseLogin = await client.PostAsJsonAsync("/login", loginDto);
         
-        // Lê o token do JSON
-        var loginResult = await responseLogin.Content.ReadFromJsonAsync<TokenResult>();
-        var token = loginResult?.token;
+        // Lê o token como string (garante compatibilidade com o retorno da API)
+        var token = await responseLogin.Content.ReadAsStringAsync();
+        token = token.Trim('"'); // Remove aspas extras se vierem no JSON
 
-        // 2. Configurar o Cliente HTTP com o Token no Header
+        // Passo B: Configurar o Cliente HTTP com o Token no Header
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        // ACT ------------------------------------------------
         var veiculoDto = new VeiculoDTO 
         { 
-            Nome = "Test Car", 
-            Marca = "Test Brand", 
+            Nome = "Fusca Teste", 
+            Marca = "VW", 
             Ano = 2025 
         };
 
+        // 2. ACT: Tentar cadastrar o veículo estando logado
         var response = await client.PostAsJsonAsync("/veiculos", veiculoDto);
 
-        // ASSERT ---------------------------------------------
+        // 3. ASSERT: Deve criar com sucesso
         Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
+        
+        // Opcional: Verificar se retornou o objeto criado
+        var veiculoCriado = await response.Content.ReadFromJsonAsync<VeiculoDTO>();
+        Assert.IsNotNull(veiculoCriado);
+        Assert.AreEqual("Fusca Teste", veiculoCriado.Nome);
     }
 
     [TestMethod]
     public async Task TestarCadastroVeiculo_SemToken_DeveRetornar401()
     {
-        // ARRANGE
+        // 1. ARRANGE
         var client = _factory.CreateClient();
-        // Não adicionamos token propositalmente
+        // Nota: NÃO configuramos o Header Authorization aqui propositalmente
 
-        var veiculoDto = new VeiculoDTO { Nome = "Ghost Car", Marca = "Ghost", Ano = 2022 };
+        var veiculoDto = new VeiculoDTO { Nome = "Carro Fantasma", Marca = "Ghost", Ano = 2022 };
 
-        // ACT
+        // 2. ACT
         var response = await client.PostAsJsonAsync("/veiculos", veiculoDto);
 
-        // ASSERT
+        // 3. ASSERT
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
     }
-
-    // Classe auxiliar para ler o JSON do login
-    public record TokenResult(string token);
+    
+    [ClassCleanup]
+    public static void ClassCleanup()
+    {
+        _factory.Dispose();
+    }
 }
